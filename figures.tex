@@ -1,7 +1,7 @@
 Fig 1:
-(Left) the orange pixels are the projection of the connected scatter plot into the bitmap to mark those pixels as occupied.
-(Middle) When placing a label for a data point, the eight rectangles are the eight candidate positions for the label to be placed.
-The green positions are available, while the red ones are not.
+(Left) We rasterize connected scatter plot onto the bitmap to mark occupied pixels, shown in orange.
+(Middle) We use the 8-position model~\cite{imhof1975positioning} to generate candidate positions for label placements.
+The cyan positions are available, while the red ones are not.
 (Right) After placing the label ``1975'', the pixels under the label need to be marked as occupied.
 
 Fig 2:
@@ -13,15 +13,14 @@ The yellow box is the area to lookup or update.
 
 Fig 3:
 (Left) Labeled connected scatter plot.
-(Right) A snapshot of the bitmap when labeling the connected scatter plot. In this figure, a greedy labeling algorithm already placed labels in the left half of the chart.
+(Right) A snapshot of the bitmap when labeling the connected scatter plot. Here, a greedy labeling algorithm already placed labels in the left half of the chart.
 
 Fig 4:
-The visualizations from an evaluation to compare (A) our algorithm to (B) the Particle-Based Labeling algorithm from Luboschik \ea \cite{luboschik:particle}.
-(C) is the visual difference of (A) and (B).
-(D) One of the labels placed by the Particle-Based Labeling algorithm overlaps with the line that the label is supposed to avoid as indicated with the red cross.
-Our proposed algorithms address these issues.
+The labeling results from (A) our Bitmap-Based Labeling and (B) Particle-Based Labeling by Luboschik \ea \cite{luboschik:particle}.
+(C) shows the visual difference between (A) and (B).
+The original Particle-Based Labeling may place a label that overlaps with existing marks by a half pixel. For example, the bounding box of the text's bounding box, as indicated with the red cross in (D), overlaps with a nearby line. 
+Our Improved Particle-Based Labeling algorithm address this issue.
 
 Fig 5:
-Results of evaluations comparing our algorithm, the original Particle-Based Labeling algorithm, and our improved Particle-Based Labeling algorithm.
-The evaluations compare runtime and number of label placed.
-Gray bands show the difference for each comparison.
+The runtime and the number of label placed by the Bitmap-Based algorithm, the original Particle-Based Labeling algorithm, and the Improved Particle-Based Labeling algorithm.
+The gray bands show the differences between conditions.

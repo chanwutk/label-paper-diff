@@ -1,28 +1,25 @@
-\section{Applications to Labeling Algorithms}
+\section{Fast Overlap Detection for Labeling Charts}
 
 In this section, we apply fast overlap detection using the occupancy bitmap
-to place labels in scatter plots, line charts, and cartographic maps.
-The algorithm for placing labels is greedy, following the labeling steps mentioned in the related work section.
-It first projects all the graphical marks to be avoided by the labels into an \emph{occupancy bitmap}.
-It then looks through each of the data points in one pass.
-For each data point, the algorithm iterates through the candidate positions of the label to be placed.
-It places the label at the first candidate position that does not overlap with any graphical mark in the occupancy bitmap (skipping the rest of the candidate locations).
-To place the label, it marks the rectangular bounding box of the label as an occupied area in the occupancy bitmap (\autoref{fig:bitmask}).
-After placing the label, it continues with the next data point.
-The algorithm to add labels in the three chart types mentioned only differs in
-(1) the graphical marks to be avoided by labels
-and (2) the candidate positions for labels.
+to place labels in scatter and connected scatter plots, line charts, and maps.
+The algorithm for placing labels is greedy, following the labeling steps described in \autoref{sec:related}.
+It first rasterizes all marks onto an \emph{occupancy bitmap}.
+It then places all labels in one pass. 
+For each data point to label, the algorithm iterates through the candidate label positions.
+It places the label at the first candidate position that does not overlap with any mark in the occupancy bitmap (skipping the remaining candidates).
+Before continuing with the next label, it marks the area taken by the label placed as occupied in the occupancy bitmap 
+by marking  the rectangular bounding box of the label (\autoref{fig:bitmask}).
+The algorithm to add labels in the these example chart types only differs in terms of (1) the graphical marks to be avoided by labels and (2) the candidate positions for labels.
 
-In scatter and connected scatter plots, candidate positions of a label are around the graphical point mark it represents.
-For a scatter plot, the marks to be avoided by labels include the point marks that represent data points in the plot.
-For a connected scatter plot, the marks to be avoided by labels include the point marks that represent data points in the plot and the line marks that connect the points (\autoref{fig:connected_scatter}).
+For scatter and connected scatter plots, we use the 8-position model~\cite{imhof1975positioning} to generate candidate positions around each point.
+For scatter plots, the marks to be avoided by labels include the point marks that represent records in the plot.
+For connected scatter plots, the marks include the points that represent records in the plots and the lines that connect them (\autoref{fig:connected_scatter}).
 
-In line charts, each line is composed of a series of data points and a line that connects them all as a single path.
-Line charts are similar to connected scatter plots, but often one label represents a whole line instead of a data point.
-Therefore, the labeling algorithm places one label per line.
-Candidate positions of a label for a line are around each data point that represents the line.
-The marks to be avoided by labels include the line marks.
+In a line chart, each group of line includes a series of points and a path that connects all the points.
+Line charts are similar to connected scatter plots, but often one label represents a whole line instead of a single record.
+Therefore, the labeling algorithm may place one label per line, at the end of the line it represents.
+In this case, candidate positions include top-right, right, and bottom-right of the rightmost point of each line.
 
-A cartographic map (\autoref{fig:eval_airport_vis}) contains geographical locations that need to be annotated by labels and geographic properties that need to be avoided by the labels.
-Candidate positions of a label are (similar to scatterplots) around the locations to annotate.
-The marks to be avoided by labels include the point marks that represent locations and marks that represent geographical features (\eg country outlines and paths).
+As shown in \autoref{fig:eval_airport_vis}, a map can contain points that represent locations, which need to be labelled, and paths that represent geographical features (\eg country outlines).
+In this example, we also draw line segments to show paths between different locations.
+Similar to scatter plots, we use the 8-position model to generate candidate positions for maps. 

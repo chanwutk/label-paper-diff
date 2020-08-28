@@ -2,61 +2,59 @@
 
 Prior work on automatic label placement has investigated different aspects of labeling including the optimization goal of the labeling algorithm, the method to detect overlapping marks, label positioning, priority of each label, and orientation of each label.
 
-Existing approaches for placing labels often either prioritize visual quality or performance.
-Approaches that focus on visual quality include simulated annealing \cite{zoraster:annealing} and 0-1 integer programming \cite{zoraster:int-program}.
-However, these approaches are slow as they repeatedly adjust labels layouts for better ones.
+Existing approaches for placing labels often either prioritize visual quality %, the number of labels placed, 
+or runtime performance.
+Several projects aimed to improve visual quality of certain chart types by defining and optimizing certain quality metrics~\cite{ladislav:layout-aware, cmolik:ghost,timo:agent,kouril:level,wu:zone}.
+However, these approaches are not generalizable as these quality metrics are typically specific 
+to the chart types. 
+As the number of labels placed is important for giving more information to readers,
+the number of labels placed is often used as a proxy for visual quality. 
+Some has applied several techniques such as simulated annealing \cite{zoraster:annealing} and
+0-1 integer programming \cite{zoraster:int-program} to increase the number of labels placed.
+However, these approaches are slow as they iteratively adjust label layouts for better ones.
 To achieve interactive runtime performance, prior works use a greedy approach \cite{luboschik:particle, mote:informed-greedy}.
-These algorithms can place 10,000 labels within the order of millisecond running time.
-Therefore, they are suitable for applications visualizing large datasets or in interactive visualizations.
+These algorithms can place 10,000 labels within the order of milliseconds.
+Therefore, they are suitable for visualizing large data sets or interactive charts.
 
-In general, a greedy labeling algorithm has three inputs: (1) a set of existing marks $M$ that labels need to avoid; (2) a set of data points $D$ to label; and (3) a set of candidate position $P$ of each data point.
-A candidate position is a position of a label relative to the position of the data point it represents (top, left, top-left \etc).
-With these three inputs, a labeling algorithm has to annotate each data point in $D$ with a label at one of the positions in $P$ without overlapping with each other and marks in $M$.
-To achieve this goal, a greedy labeling algorithm has two main steps:
+In general, a greedy label placement algorithm has two inputs:
+(1) a set of data points $D$ to label,
+(2) a set of existing marks $M$ that labels need to avoid.
+From these inputs, it takes the following steps to determine label placements:
 \begin{enumerate}
   \vspace{-5pt}
-  \item Record the areas that are occupied by the marks in $M$ in a data structure $O$ for overlap detection.
+  \item Include all the marks $M$ in a data structure $O$ that stores occupancy information.
   \vspace{-5pt}
-  \item Place a label for each data point in $D$, with two steps.
+  \item For each data point in $D$:
   \vspace{-5pt}
   \begin{enumerate}
-    \item Find a position in $P$ that does not overlap with any mark recorded in $O$.
+    \item Determines a list of candidate positions $P$ nearby its corresponding marks, ordered by their preferences.
     \vspace{-2.5pt}
-    \item Place the label and record the area that is occupied by the label as a rectangle mark in $O$.
+    \item Find the most preferable position $p \in P$ that does not overlap with any mark as recorded in $O$.
+    \vspace{-2.5pt}
+    \item If a non-overlapping position $p$ exists, place the label at the position $p$ and update $O$ to include the label placed.
   \end{enumerate}
 \end{enumerate}
 
-In the steps shown above, each of the mentioned greedy algorithms proposes different
-(1) approaches to records the areas that are occupied by the marks in $M$,
-(2) data structures $O$ to detect overlapping marks.
+To determine candidate label positions for a mark, labeling algorithms often use 8-position model~\cite{imhof1975positioning}, generating candidate positions based on the four corners (e.g., top-left) and sides (top, bottom, left, and right) of the mark's axis-aligned bounding rectangle.
+Hirsch~\cite{hirsch1982algorithm} extends this discrete positioning approach as a more generalized "slider model".
+This paper applies the standard 8-position model to generate candidate positions for different chart types 
+and focus on accelerating overlap detection.
 
-To record areas that all marks in $M$ occupy in a chart, Luboschik \ea \cite{luboschik:particle} propose an Image-Based approach and a Vector-Based approach.
-The Image-Based approach projects all the marks in $M$ into an image of the same size as the chart.
-Drawing marks into an image can be done efficiently with graphic libraries of major programming languages such as C/C++ (graphics.h), Java (awt), Python (PIL), and JavaScript (canvas).
-Any pixel that lies within the area covered by a mark is considered occupied.
-The Vector-Based approach samples points to represent contours of vector graphics of marks in $M$ and records it to $O$.
-Our bitmap supports both approaches by projecting either occupied pixels or sampled points into the bitmap.
+Since detecting overlapping marks is the bottleneck for label placement algorithms, prior work has investigated
+data structures to speed up overlap detection.
+The \emph{trellis strategy} by Mote \ea \cite{mote:informed-greedy} subdivides a chart into a two dimensional grid.
+To check if a label can be placed at a position, it checks the positions of other data points and their labels in neighboring grid boxes.
 
-An efficient data structure to detect overlapping marks is an essential part of a labeling algorithm.
-Different data structures have been proposed to speed up labeling algorithms.
+To generalize trellis strategy for arbitrary marks, Luboschik \ea presents Particle-Based Labeling \cite{luboschik:particle}, 
+which represents a mark as a set of \emph{virtual particles} that are sampled to cover the areas occupied by the mark.
+It then applies the trellis strategy to check for overlaps between the virtual particles instead of the actual marks.
+To sample particles from a mark, they propose two approaches. 
+First, image-based sampling rasterizes all the marks in $M$ onto an image and then samples particles 
+from occupied pixels. 
+Alternatively, the vector-based approach samples points to represent the contours of vector graphics of marks.
 
-The \emph{trellis strategy} in Mote \ea \cite{mote:informed-greedy} subdivides a chart into a two dimensional grid.
-To check if a label can be placed at a position, it compares the position of the label to the position of each data point or each data point and its placed label in neighboring grid boxes.
-Unfortunately, this overlap detection approach with the \emph{trellis strategy} only supports labeling scatter plots.
-
-Luboschik \ea \cite{luboschik:particle} present a data structure that represents all graphical marks as a collection of \emph{virtual particles} covering the marks.
-To detect overlap, it checks for overlap with the \emph{virtual particles} instead of the actual marks.
-Also, the chart is subdivided into a 2D grid,
-where each grid box contains the \emph{virtual particles} that lie within the area of the box.
-With this subdivision, the algorithm only needs to check for overlap against the \emph{virtual particles} inside the neighboring grid boxes.
-This data structure is optimized for label-to-label overlap detection as the number of particles needed to represent each placed label is small.
-Particle-Based Labeling focuses on labeling charts with small graphical marks (\eg scatter plots).
-
-An aspect of this data structure that we wish to improve is its ability to efficiently represent and detect overlap with large filled graphical marks.
-This data structure represents a filled mark with many \emph{virtual particles} placed densely inside the area that the mark occupies.
-As a result, grid boxes can contain many \emph{virtual particles}.
-So, checking whether the position of a label is occupied by any mark in a particular grid box is expensive.
-As a result, the runtime of the algorithm overall is significantly increased.
-
-In this paper, we present the \emph{occupancy bitmap} as the data structure for overlap detection in greedy labeling algorithms.
-It focuses on quickly detecting overlap in charts with large filled graphical marks.
+Particle-Based Labeling works for any kind of marks, but it is more efficient for detecting overlaps between labels and small marks. %  such as overlaps between points in a scatter plot or between labels. 
+For large filled marks (such as an area in area chart), Particle-Based Labeling can be inefficient 
+because it needs to represent a filled mark with many particles densely placed inside the mark's occupied area.
+Thus, checking whether the position of a label is occupied by any mark in a particular grid box is expensive.
+This paper presents a Bitmap-Based algorithm, which improves upon Particle-Based Labeling and can efficiently detect overlaps in charts with large filled graphical marks.

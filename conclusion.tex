@@ -1,14 +1,16 @@
-\section{Conclusion}
+\section{Conclusion and Future Work}
 
-We have developed an \emph{occupancy bitmap} that efficiently detects overlappings of labels to graphical marks and other labels in a chart.
-The bitmap is used in a greedy-based labeling algorithm to quickly label charts.
-We show that this labeling algorithm can label scatter/connected scatter plots, line charts, cartographic maps, and their combinations.
-We compare our algorithm with the state-of-the-art Particle-Based Labeling algorithm.
-Our algorithm is significantly faster and able to place similar numbers of labels in charts.
+We present \emph{occupancy bitmap}, a data structure that can efficiently detect overlaps between a label and other marks or labels in a chart.
+We apply this bitmap in a greedy label placement algorithm and apply it to label scatter plots, connected scatter plots, 
+line charts, and maps.
+We compare this Bitmap-Based Labeling algorithm with the state-of-the-art Particle-Based Labeling algorithm,
+showing that the Bitmap-Based algorithm is significantly faster and can place similar numbers of labels in charts.
 
-\section{Future Work}
+For future work, we plan to apply occupancy bitmaps to label other charts that 
+need a different placement strategy other than the 8-position model used in this paper. 
+For example, stacked area charts need a method to place a label inside each area shape.
 
-In future work, we would like to apply our \emph{occupancy bitmap} and our algorithm to label other types of charts.
-For example, area charts are widely used but are not supported by our current labeling algorithm since they have different positioning of labels.
-Fortunately, our \emph{occupancy bitmap} can be used to detect overlapping of labels and areas.
-Our bitmap is designed to be a module for labeling algorithms, so it can be swapped into other labeling algorithms implemented in the future that make use of it to label area charts.
+For chart interactions like zooming or panning, a na{\"\i}ve greedy label placement algorithm may re-render label placements 
+for every frame of animations, which can be too slow for large datasets.
+We plan to explore better optimization to avoid re-rendering in every new frame,
+while providing smooth interactions.

@@ -1,30 +1,27 @@
 \section{Fast Overlap Detection with Occupancy Bitmaps}
 
-As we discussed earlier, the bottleneck of a label placement algorithm is to detect whether existing elements overlap with the new label to be placed.
-This section presents the \emph{occupancy bitmap}, a data structure that we use to accelerate overlap detection.
+We now present an \emph{occupancy bitmap} as a data structure to accelerate overlap detection, which is the bottleneck of label placement.
 
-Our occupancy bitmap is responsible for three parts of a label placement algorithm.
-First, it records occupied areas of existing marks that labels need to avoid.
-Second, it checks if a position of a label is available for placing (overlap detection).
-And third, it records occupied areas of placed labels (occupancy updates).
+To accelerate overlap detection, an occupancy bitmap allows a label placement algorithm to efficiently check if a candidate position for a new label is previously occupied.  
+Once a new label is placed, the labeling algorithm can also quickly
+update the occupancy bitmap to include the new occupied area. 
 
-An occupancy bitmap is a two-dimensional bitmap of the same size as the chart.
-Building on well-known bitmaps~\cite{wiki:bitarray}, each bit in the occupancy bitmap records the occupancy of its corresponding pixel in the chart as shown in
+An occupancy bitmap is a two-dimensional bitmap of the same resolution as the screen-space (in pixel area) of the chart.
+Building on well-known bitmap (or bit arrays) structures~\cite{wiki:bitarray}, each bit in the occupancy bitmap records the occupancy of its corresponding pixel in the chart as shown in
 \autoref{fig:place_label}.
 A bit is set to one if its corresponding pixel is occupied and zero otherwise.
 
-Occupancy bitmaps provide two key benefits over the data structure used in Particle-Based labeling.
+Occupancy bitmaps provide two key benefits over the data structure used in Particle-Based Labeling.
 First, by using a bitmap to store occupancy information, the time required to check if placing a label at a certain position overlaps with any existing elements depends only on the chart size and label size, but does not depend on the complexity and the number of existing elements.
-Second, the bitmap structure leverages bitwise operators to accelerate overlap detection and occupancy updates.
-We implement the bitmap using a one-dimensional array of n-bits integers, in which each integer is a bitstring representing
-a subpart of a row in the bit matrix.
-Thus, an integer in the array encodes the occupancy of n-horizontally consecutive pixels in the chart.\footnote{In our JavaScript implementation, we use 32-bit integer as it is the largest available integer size in JavaScript.}
+Second, the bitmap structure leverages bitwise operators to accelerate two key operations for overlap detection: 
+(1) The \emph{lookup} operation checks if the area is partly occupied to decide whether the area is available for placing labels;
+(2) The \emph{update} operation marks all bits in the area taken up by a new label placed as occupied.
+
+We implement the bitmap using a one-dimensional array of n-bits integers, in which each integer represents the bits of a contiguous subset of a row in the bit matrix.
+Thus, an integer in the array encodes the occupancy of $n$ horizontally consecutive pixels in the chart.\footnote{In our JavaScript implementation, we use 32-bit integer as it is the largest available integer size in JavaScript.}
 For a chart with width $w$ and height $h$, the occupancy of the pixel $(x, y)$
 is the bit at the position $((y \times w) + x) \bmod n$ of the integer at the array index $\lfloor\frac{(y \times w) + x}{n}\rfloor$.
 This bitmap layout is efficient because it supports looking up and updating a vector of bits simultaneously, instead of one bit at a time.
-Both operations are performed on a rectangular area.
-(1) The lookup operation checks if the area is partly occupied to decide whether the area is available for placing labels.
-(2) The update operation marks all bits in the area taken up by a placed label as occupied.
 
 In the underlying array of the bitmap, there are two sets of integer entries that interact with the areas.
 First, $I_f$ is the set of integer entries that are fully covered by the area, shown in the red column number 1 and 2 in \autoref{fig:bitmask}.
@@ -32,44 +29,41 @@ Second, $I_p$ is the set of integer entries that are partly covered by the area,
 
 For lookup, the algorithm can check if each integer entry in $I_f$ is zero.
 For each entry in $I_p$, the algorithm masks the entry with a bitwise-and operation to include only the bits inside the area, before checking if the masking result is zero.
-For example, $arr[5]$ and $arr[6]$ in \ \autoref{fig:bitmask} are in $I_f$. The integer value of each entry is $0000_2$, meaning that the four pixels it represents are all unoccupied.
-$arr[4]$ and $arr[7]$ are in $I_p$.
-The integer value of $arr[4]$ is $0000_2$.
-The masking value is $0011_2$ because only the right two bits are in the area.
-The masking result is $0000_2 \& 0011_2 = 0000_2$, meaning that the two bits inside the area, are all unoccupied.
-The integer value of $arr[7]$ is $0011_2$.
-The masking value is $1000_2$ because only the leftmost bits is in the area.
+For example, $arr_5$ and $arr_6$ in \ \autoref{fig:bitmask} are in $I_f$. The integer value of each entry is $0000_2$, meaning that the four pixels it represents are all unoccupied.
+$arr_4$ and $arr_7$ are in $I_p$.
+The integer value of $arr_7$ is $0011_2$.
+The masking value is $1000_2$ because only the leftmost bit is in the area.
 The masking result is $0011_2 \& 1000_2 = 0000_2$, meaning that the leftmost bit, which is inside the area, is unoccupied.
+The same process with different masking value is applied for the integer value of $arr_4$.
 Then, we can conclude that the bits from coordinate $(2, 1)$ to $(12, 1)$ are all unoccupied (zero).
 The process is repeated for row 1 to row 4 to check the whole rectangular area for the potential label position.
 
 All the bits represented by each integer entry in $I_f$ can be set as occupied simultaneously by setting the integer value of each entry to $11...11_2$.
 For each entry in $I_p$, the algorithm masks the entry with a bitwise-or operation to retain previous values of the bits outside of the area.
-For the example shown in \autoref{fig:bitmask}, $arr[5]$ and $arr[6]$ are in $I_f$, each entry is set to $1111_2$, meaning that four bits that it represents are all set to occupied.
-$arr[4]$ and $arr[7]$ are in $I_p$.
-The integer value of $arr[4]$ is $0000_2$.
-The masking value is $0011_2$ because only the right two bits are in the area.
-The masking result is $0000_2 | 0011_2 = 0011_2$.
-The entry $arr[4]$ is then set to $0011_2$, meaning that the two bits inside the area, are all set to occupied.
-The integer value of $arr[7]$ is $0011_2$.
+For the example shown in \autoref{fig:bitmask}, $arr_5$ and $arr_6$ are in $I_f$, each entry is set to $1111_2$, meaning that four bits that it represents are all set to occupied.
+$arr_4$ and $arr_7$ are in $I_p$.
+The integer value of $arr_7$ is $0011_2$.
 The masking value is $1000_2$ because only the leftmost bits are in the area.
 The masking result is $0011_2 | 1000_2 = 1011_2$.
-The entry $arr[7]$ is then set to $1011_2$, meaning that the leftmost bit, which is inside the area, is set to occupied.
-Notice that the right three bits of $arr[7]$ are kept as they were because the algorithm masks the integer entry with $1000_2$ to retain their previous values.
-After running the steps above, all bits from coordinate $(2, 1)$ to $(12, 1)$ are set to occupied.
+The entry $arr_7$ is then set to $1011_2$, meaning that the leftmost bit, which is inside the area, is set to occupied.
+Notice that the right three bits of $arr_7$ are kept as they were because the algorithm masks the integer entry with $1000_2$ to retain their previous values.
+The same process with different masking value is applied for the integer value of $arr_4$.
+After running these steps, all bits from coordinate $(2, 1)$ to $(12, 1)$ are set to occupied.
 However, the algorithm does not repeat the process for all rows 1 to 4.
-Instead, it repeats for the first, the last, and every $labelHeight_{min}$ row where $labelHeight_{min}$ is the height of the label that has the shortest height.
+Instead, it only marks the first, the last, and every $labelHeight_{min}$ row as occupied; $labelHeight_{min}$ is the height of the label that has the shortest height.
 So, if $labelHeight_{min}=2$, this process repeats for row 1, 3, and 4.
 Updating fewer rows of bits speeds up update operations, while not losing any information about the area marked as occupied.
 A label of at least height $labelHeight_{min}$ that overlaps with the occupied area is guaranteed to overlap with at least one of the rows set to occupied.
 
-Checking for overlap or marking an integer entry to occupied can be done in a constant number of bitwise-operations.
+Checking for overlap or marking an integer entry as occupied can be done in a constant number of bitwise-operations.
 These operations have constant runtime, regardless of the size of the integer.
 Our implementation uses the largest available integer size, to process many bits in parallel.
 
-To record the projection of the marks that labels need to avoid (marks in $M$).
-First, we draw all the marks in $M$ into a canvas.
-Every pixel that is not fully opaque is considered occupied and its corresponding bit in the bitmap set to one.
-The number of bits used to represent graphical marks is bounded by the size of the chart.
-Therefore, our labeling algorithm using the \emph{occupancy bitmap} can perform occupancy checks and updates consistently,
-regardless of the number and size of the graphical marks that need to not overlap with labels.
+To record the areas of the marks for the labels to avoid, we rasterize all the marks in $M$ onto
+the bitmap.
+Every pixel that is not fully transparent is considered occupied and its corresponding bit in the bitmap set to one.
+The number of bits used to represent marks is bounded by the size of the chart.
+Thus, the runtime for rasterization linearly depends on the chart resolution and number of the graphical marks.
+After the rasterization, a labeling algorithm using the \emph{occupancy bitmap} can efficiently perform occupancy checks and updates.
+The runtime for an occupancy check or an update only depends linearly on the size of the label,
+regardless of the number and size of the marks that need to not overlap with labels.

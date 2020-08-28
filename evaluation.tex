@@ -1,63 +1,64 @@
 \section{Evaluation}
 
-To evaluate our labeling algorithm using \emph{occupancy bitmap}, we compare our algorithm to the Particle-Based Labeling algorithm from Luboschik~\ea \cite{luboschik:particle}, the current state-of-the-art fast labeling algorithm.
-The criteria that we use to compare are (1) runtime and (2) visual quality of the label placements.
-We use the number of labels placed as an indication for visual quality because more labels give more information to readers.
-To facilitate the comparison, we implemented both algorithms as transforms in Vega~\cite{satyanarayan:vega}.
+To evaluate our labeling algorithm using \emph{occupancy bitmap}, we compare it to Particle-Based Labeling \cite{luboschik:particle}, the current state-of-the-art fast labeling algorithm.
+To perform this comparison, we implemented both algorithms as transforms in Vega~\cite{satyanarayan:vega}
+and measure runtime and number of labels placed for each condition.
 
-The task that we use to benchmark our algorithm is to label a map that shows airports in the US
+Our benchmark example is a map that shows airports in the US
 and travel routes between the Seattle-Tacoma airport (Sea-Tac) and other airports\footnote{This map is originally from the Vega-Lite example gallery at \url{https://vega.github.io/vega-lite/examples/geo_rule.html}.}, as shown in \autoref{fig:eval_airport_vis}.
 The dataset contains 3320 airports and 56 routes from Sea-Tac.
 In the chart, each black dot represents an airport with a route to Sea-Tac.
 A black line between the airport and Sea-Tac depicts the corresponding route.
 Red texts each in a red box are the labels representing names of airports that have a direct route to Sea-Tac.
 Meanwhile, a gray dot represents an airport without a direct route to Sea-Tac.
-The chart also outlines states in the US in light gray.
-In this benchmark task, we run the algorithms to place labels (shown in teal) for airports without a direct route to Sea-Tac.
+The chart also outlines US states in light gray.
+In this benchmark, we run the algorithms to place labels (shown in teal) for airports without a direct route to Sea-Tac.
 Each airport contains eight candidate label positions (2 horizontal, 2 vertical, and 4 diagonal) around the airport location.
-The lines, points, red labels, and outline paths are positioned before running the algorithm.
-They act as obstacles for the teal labels to avoid.
+The lines, points, red labels, and outline paths are placed before running the algorithm,
+acting as obstacles for the teal labels to avoid.
+To account for higher resolution displays, we test the algorithm with chart widths ranging from $1000$ pixels up to $8000$ pixels, with a fixed aspect ratio of 5:8.
 
-To account for higher resolution displays, we test the algorithm with chart widths from $1000$ up to $8000$.
-The benchmark uses the image-based approach to project the graphical marks to be avoided by labels.
-We choose to use the image-based over the vector-based approach for two reasons.
-First, the image projection is easy to implement with existing image libraries.
-The vector-based approach needs to be re-implemented for each mark type.
+For the baseline condition, we use the Particle-Based Labeling\cite{luboschik:particle} with image-based sampling instead of vector-based sampling for two reasons.
+First, image-based sampling is a more practical approach to adopt in visualization tools because 
+every standard graphic library can rasterize any mark types.
+Meanwhile, vector-based sampling requires separate implementations for different mark types.
 Second, the image-based approach is parameter-free.
-In contrast, the vector based approach requires adjusting the sampling rate of particles to balance the projection's accuracy and performance when detecting overlaps.
+In contrast, the vector-based approach requires adjusting the sampling rate of particles to balance the fidelity against runtime performance.
 
-From Luboschik \ea \cite{luboschik:particle}, we notice that there are two issues when projecting graphical marks.
+We also notice that the mark rasterization process in Particle-Based Labeling has two issues.
 First, a particle that represents an occupied pixel is placed at the center of the pixel.
-This placement of particles allows labels to up to half-way overlap with a pixel that is supposed to be occupied (\autoref{fig:eval_airport_vis}).
-Second, the algorithm projects every occupied pixel into a particle, which is unnecessarily too many.
-The amount of particles used affects the runtime of the algorithm as overlap detection needs to compare a position to more particles.
+This placement of particles may allow a label to slightly overlap with other marks by a half pixel, as shown in \autoref{fig:eval_airport_vis}D.
+Second, the algorithm rasterizes every occupied pixel into a particle, which is unnecessarily too many.
+The number of particles used affects the runtime of the algorithm as overlap detection needs to compare a position to more particles.
 
-We addressed these two issues in a version of Particle-Based Labeling, which we refer to as improved Particle-Based Labeling.
+We addressed these two issues in a version of Particle-Based Labeling, which we refer to as Improved Particle-Based Labeling.
 We addressed the first issue, a correctness issue, by placing particles at the four corners of an occupied pixel.
-Since a label is a zero-degree-angled rectangle, it cannot overlap with an occupied pixel without overlapping with a particle at one of its corners first.
-The second is a runtime issue that we addressed by omitting some particles that are too close to an existing particle.
-Projection in our improved algorithm has two parts.
-First, it projects all particles along the outlines of graphical marks.
-Second, it projects particles inside graphical marks every other $H_{min}$ pixels vertically and $W_{min}$ horizontally pixels.
-$H_{min}$ is the height of the label with the shortest height.
-$W_{min}$ is the width of the label with the shortest width.
+Since a label's bounding box is an axis-aligned rectangle, it cannot overlap with an occupied pixel without overlapping with a particle at one of its corners first.
+We then address the runtime issue by omitting particles that are too close to others and thus are redundant.
+To do so, our improved algorithm rasterize a mark in two phases. 
+First, it rasterizes all particles along the outlines of the mark.
+Second, it rasterizes particles inside the marks for every other $H_{min}$ pixels vertically and $W_{min}$ pixels horizontally,
+where $H_{min}$ is the height of the label with the shortest height and $W_{min}$ is the width of the label with the shortest width.
 This optimization retains the algorithm's correctness, while greatly reducing the number of particles placed.
 
 \subsection{Performance}
 
-For each parameter (labeling algorithm and chart's width), we run the task 20 times and take their median value.
-The result in \autoref{fig:eval_airport_performance} shows that
+For each experimental condition (labeling algorithm and chart width), we run the task 20 times and 
+calculate the median runtime and number of labels placed.
+\autoref{fig:eval_airport_performance} shows that
 the improved Particle-Based Labeling algorithm is faster than the original one as the chart size increases.
-Our bitmap-based algorithm performs significantly better than both the original and the improved Particle-Based Labeling algorithm.
-Our algorithm takes at least 22\% less time to run, and the improvement tends to be higher as the chart size increases.
+Our Bitmap-Based algorithm performs significantly better than both the original and Improved Particle-Based Labeling algorithms,
+taking at least 22\% less time to run across the chart sizes. 
+The improvement also generally increases as the chart size increases.
 
-\subsection{Visual Quality}
+\subsection{Number of Labels Placed}
 
-The original Particle-Based Labeling algorithm places significantly more labels than our improved version.
-This means that its projection process of marks to be avoided by labels largely contributes to the increase of placed labels.
-Therefore, these excess labels overlap with one of the graphical marks in the chart as shown in \autoref{fig:eval_airport_vis} (D).
-The improved version can catch these overlaps because its particles placed at each pixel's corners cover the whole pixel.
-The original version cannot catch these overlaps because its placement of a particle at each pixel's center does not cover the whole pixel.
+As we discussed earlier, the original Particle-Based Labeling may allow a label
+to overlap with a mark by a half pixel, thus it places significantly more labels than 
+Improved Particle-Based Labeling and Bitmap-Based Labeling.
 
-Comparing our algorithm to the improved Particle-Based Labeling algorithm, our algorithm placed 0.8\% fewer labels in the chart with a width of 8000, and 3.2\% fewer labels at a width of 1000.
-Our algorithm is able to place a similar number of labels as the Particle-Based Labeling algorithm if we only count labels that do not overlap with any marks.
+To avoid the effect of this correctness issue, we focus on the comparison of Bitmap-Based Labeling 
+with Improved Particle-Based Labeling. 
+Bitmap-Based Labeling placed 0.8\% fewer labels for charts with 8000 pixel width 
+and 3.2\% fewer labels for charts with 1000 pixel width.
+Thus, we can conclude that Bitmap-Based Labeling can place a similar number of labels as Particle-Based Labeling if we only count labels that do not overlap with any marks.
