@@ -1,77 +1,27 @@
-\newcommand{\figurePlaceLabel}{
-  \begin{figure}[tb]
-    \centering
-    \includegraphics[width=.28\columnwidth]{figures/prefill_bitmap_2}
-    \includegraphics[width=.01\columnwidth]{figures/spacer}
-    \includegraphics[width=.33\columnwidth]{figures/place_label_2.png}
-    \includegraphics[width=.01\columnwidth]{figures/spacer}
-    \includegraphics[width=.33\columnwidth]{figures/place_label_4}
-    \caption{
-      (Left) the orange pixels are the projection of the connected scatter plot into the bitmap to mark those pixels as occupied.
-      (Middle) When placing a label for a data point, the eight rectangles are the eight candidate positions for the label to be placed.
-      The green positions are available, while the red ones are not.
-      (Right) After placing the label ``1975'', the pixels under the label need to be marked as occupied.
-    }
-    \vspace{-10pt}
-  \label{fig:place_label}
-  \end{figure}
-}
+Fig 1:
+(Left) the orange pixels are the projection of the connected scatter plot into the bitmap to mark those pixels as occupied.
+(Middle) When placing a label for a data point, the eight rectangles are the eight candidate positions for the label to be placed.
+The green positions are available, while the red ones are not.
+(Right) After placing the label ``1975'', the pixels under the label need to be marked as occupied.
 
-\newcommand{\figureBitmask}{
-  \begin{figure}[tb]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/bitmask-short.png}
-    \caption{
-      The black indices indicate the x/y coordinate of pixels in the chart.
-      The red indices indicate the indices of the underlying array of the bitmap.
-      For the purpose of demonstration, the bitmap is implemented on an array of 4-bit integers each representing a bit-string of length 4.
-      The blue circles are marking occupied pixels.
-      The yellow box is the area to lookup or update.
-    }
-  \label{fig:bitmask}
-  \end{figure}
-}
+Fig 2:
+The black indices indicate the x/y coordinate of pixels in the chart.
+The red indices indicate the indices of the underlying array of the bitmap.
+For the purpose of demonstration, the bitmap is implemented on an array of 4-bit integers each representing a bit-string of length 4.
+The blue circles are marking occupied pixels.
+The yellow box is the area to lookup or update.
 
-\newcommand{\figureConnectedScatter}{
-  \begin{figure}[tb]
-    \centering
-      \includegraphics[width=.4\columnwidth]{figures/connectec-scatter.png}
-      \includegraphics[width=.05\columnwidth]{figures/spacer.png}
-      \frame{\includegraphics[width=.4\columnwidth]{figures/connected-scatter-bitmap.png}}
-    \caption{
-      (Left) Labeled connected scatter plot.
-      (Right) A snapshot of the bitmap when labeling the connected scatter plot. In this figure, a greedy labeling algorithm already placed labels in the left half of the chart.
-    }
-    \vspace{-10pt}
-    \label{fig:connected_scatter}
-  \end{figure}
-}
+Fig 3:
+(Left) Labeled connected scatter plot.
+(Right) A snapshot of the bitmap when labeling the connected scatter plot. In this figure, a greedy labeling algorithm already placed labels in the left half of the chart.
 
-\newcommand{\figureEvalAirportVis}{
-  \begin{figure}[tb]
-    \centering
-      \includegraphics[width=\columnwidth]{figures/eval_reachable_airports_vis.png}
-    \caption{
-        The visualizations from an evaluation to compare (A) our algorithm to (B) the Particle-Based Labeling algorithm from Luboschik \ea \cite{luboschik:particle}.
-        (C) is the visual difference of (A) and (B).
-        (D) One of the labels placed by the Particle-Based Labeling algorithm overlaps with the line that the label is supposed to avoid as indicated with the red cross.
-        Our proposed algorithms address these issues.
-    }
-    \vspace{-10pt}
-    \label{fig:eval_airport_vis}
-  \end{figure}
-}
+Fig 4:
+The visualizations from an evaluation to compare (A) our algorithm to (B) the Particle-Based Labeling algorithm from Luboschik \ea \cite{luboschik:particle}.
+(C) is the visual difference of (A) and (B).
+(D) One of the labels placed by the Particle-Based Labeling algorithm overlaps with the line that the label is supposed to avoid as indicated with the red cross.
+Our proposed algorithms address these issues.
 
-\newcommand{\figureEvalAirportPerformance}{
-  \begin{figure}[tb]
-    \centering
-      \includegraphics[width=\columnwidth]{figures/eval_reachable_airports_results.png}
-    \caption{
-      Results of evaluations comparing our algorithm, the original Particle-Based Labeling algorithm, and our improved Particle-Based Labeling algorithm.
-      The evaluations compare runtime and number of label placed.
-      Gray bands show the difference for each comparison.
-    }
-    \vspace{-10pt}
-    \label{fig:eval_airport_performance}
-  \end{figure}
-}
+Fig 5:
+Results of evaluations comparing our algorithm, the original Particle-Based Labeling algorithm, and our improved Particle-Based Labeling algorithm.
+The evaluations compare runtime and number of label placed.
+Gray bands show the difference for each comparison.
