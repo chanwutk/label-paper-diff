@@ -1,0 +1,10 @@
+Legible labels should not overlap with other marks in a chart.
+The state-of-the-art labeling algorithm detects overlaps using a set of points to approximate each mark's shape.
+This approach is inefficient for large marks or many marks as it requires too many points to detect overlaps.
+In response, we present a novel label placement algorithm, which leverages \emph{occupancy bitmaps} to accelerate overlap detection.
+To create an occupancy bitmap, we project all marks onto a bitmap based on the area they occupy in the chart.
+The projection is image-based, so it supports projections of marks with any shape.
+With the bitmap, we can efficiently place labels without overlapping existing marks,
+regardless of the number and geometric complexity of the marks.
+Our algorithm offers significant performance improvements over the state-of-the-art approach
+while maintaining a similar level of visual quality.

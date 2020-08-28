@@ -1,0 +1,146 @@
+\newcommand{\figurePositions}{
+  \begin{figure}[tb]
+    \centering
+      \includegraphics[width=\columnwidth]{figures/positions.png}
+    \caption{
+      4-position model is represented by (A). 8-position model is represented by (A) and (B). 4-slider model is represented by (C).
+    }
+    \vspace{-10pt}
+    \label{fig:positions}
+  \end{figure}
+}
+
+\newcommand{\figurePlaceLabel}{
+  \begin{figure}[tb]
+    \centering
+    \includegraphics[width=.28\columnwidth]{figures/prefill_bitmap_2}
+    \includegraphics[width=.01\columnwidth]{figures/spacer}
+    \includegraphics[width=.33\columnwidth]{figures/place_label_2.png}
+    \includegraphics[width=.01\columnwidth]{figures/spacer}
+    \includegraphics[width=.33\columnwidth]{figures/place_label_4}
+    \caption{
+      (Left) the orange pixels are the projection of the connected scatter plot into the bitmap to mark those pixels as occupied.
+      (Middle) When placing a label for a data point, the eight rectangles are the eight candidate positions for the label to be placed.
+      The green positions are available, while the red ones are not.
+      (Right) After placing the label ``1975'', the pixels under the label need to be marked as occupied.
+    }
+    \vspace{-10pt}
+  \label{fig:place_label}
+  \end{figure}
+}
+
+\newcommand{\figureBitmask}{
+  \begin{figure}[tb]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/bitmask-short.png}
+    \caption{
+      The black indices indicate the x/y coordinate of pixels in the chart.
+      The red indices indicate the indices of the underlying array of the bitmap.
+      For the purpose of demonstration, the bitmap is implemented on an array of 4-bit integers each representing a bit-string of length 4.
+      The blue circles are marking occupied pixels.
+      The yellow box is the area to lookup or update.
+    }
+  \label{fig:bitmask}
+  \end{figure}
+}
+
+\newcommand{\figureConnectedScatter}{
+  \begin{figure}[tb]
+    \centering
+      \includegraphics[width=.4\columnwidth]{figures/connectec-scatter.png}
+      \includegraphics[width=.05\columnwidth]{figures/spacer.png}
+      \frame{\includegraphics[width=.4\columnwidth]{figures/connected-scatter-bitmap.png}}
+    \caption{
+      (Left) Labeled connected scatter plot.
+      (Right) A snapshot of the bitmap when labeling the connected scatter plot. In this figure, a greedy labeling algorithm already placed labels in the left half of the chart.
+    }
+    \vspace{-10pt}
+    \label{fig:connected_scatter}
+  \end{figure}
+}
+
+\newcommand{\figureLineChart}{
+  \begin{figure}[tb]
+    \centering
+      \includegraphics[width=.45\columnwidth]{figures/line_chart.png}
+      \includegraphics[width=.05\columnwidth]{figures/spacer.png}
+      \frame{\includegraphics[width=.45\columnwidth]{figures/line_chart_bitmap.png}}
+    \caption{
+      (Left) Each line in the chart represents $CO_2$ level in each decade.
+      The decade number is shown as a label to the right end of each line.
+      In this chart we choose the only anchor point of each line to be the right most point of the line, and anchor points to be to the right, top-right, bottom-right of the anchor point.
+      For the label "196x" and "197x", both are labeled at the  bottom-right position.
+      The right positions make them overlap with the label "195x" and "196x" respectively.
+      (Right) The bitmap result after all the labels are placed.
+    }
+    \vspace{-10pt}
+    \label{fig:line_chart}
+  \end{figure}
+}
+
+\newcommand{\figureStackedBarChart}{
+  \begin{figure}[tb]
+    \centering
+      \includegraphics[width=.45\columnwidth]{figures/stacked_bar.png}
+
+      \frame{\includegraphics[width=.45\columnwidth]{figures/stacked_bar_bitmap.png}}
+      \includegraphics[width=.05\columnwidth]{figures/spacer.png}
+      \frame{\includegraphics[width=.45\columnwidth]{figures/stacked_bar_bitmap_border.png}}
+    \caption{
+      (Top) A stacked bar chart where each bar is labeled with its height.
+      The labels are placed by our algorithm where the only position option for label is at the top inside of the bar it represents.
+      (Bottom-Left) Bitmap of the fills of bars and labels, used in the algorithm.
+      Labels are placed inside each bar, so they are not presented in the unoccupied space.
+      (Bottom-Right) Bitmap of the strokes of bars and labels, used in the algorithm.
+      Four of the labels are hidden (not placed) as each of them does not fit in the bar it represents.
+    }
+    \vspace{-10pt}
+    \label{fig:stacked_bar_chart}
+  \end{figure}
+}
+
+\newcommand{\figureLabelInside}{
+  \begin{figure}[tb]
+    \centering
+    \includegraphics[width=\columnwidth]{label_inside_2}
+    \caption{
+      (Top-Left) overlapping objects that this algorithm is labeling.
+      (Top-Right) the projection of the objects to the bitmaps; yellow bits are the projection of the actual fill of the objects to the first bitmap; red bits are the the projection of the borders of the objects to the second bitmap.
+      (Bottom-Left) The green label can be placed in the position.
+      In this case, the algorithm only looks at the overlapping with borders.
+      Since this label does not overlap with any border, it can be placed at the position.
+      (Bottom-Right) The red label overlaps with borders; therefore, it cannot be placed in the position.
+    }
+    \vspace{-10pt}
+    \label{fig:label_inside_2}
+  \end{figure}
+}
+
+\newcommand{\figureEvalAirportVis}{
+  \begin{figure}[tb]
+    \centering
+      \includegraphics[width=\columnwidth]{figures/eval_reachable_airports_vis.png}
+    \caption{
+        The visualizations from an evaluation to compare (A) our algorithm to (B) the Particle-Based Labeling algorithm from Luboschik \ea \cite{luboschik:particle}.
+        (C) is the visual difference of (A) and (B).
+        (D) One of the labels placed by the Particle-Based Labeling algorithm overlaps with the line that the label is supposed to avoid as indicated with the red cross.
+        Our proposed algorithms address these issues.
+    }
+    \vspace{-10pt}
+    \label{fig:eval_airport_vis}
+  \end{figure}
+}
+
+\newcommand{\figureEvalAirportPerformance}{
+  \begin{figure}[tb]
+    \centering
+      \includegraphics[width=\columnwidth]{figures/eval_reachable_airports_results.png}
+    \caption{
+      Results of evaluations comparing our algorithm, the original Particle-Based Labeling algorithm, and our improved Particle-Based Labeling algorithm.
+      The evaluations compare runtime and number of label placed.
+      Gray bands show the difference for each comparison.
+    }
+    \vspace{-10pt}
+    \label{fig:eval_airport_performance}
+  \end{figure}
+}

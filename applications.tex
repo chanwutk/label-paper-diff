@@ -1,0 +1,28 @@
+\section{Applications to Labeling Algorithms}
+
+In this section, we apply fast overlap detection using the occupancy bitmap
+to place labels in scatter plots, line charts, and cartographic maps.
+The algorithm for placing labels is greedy, following the labeling steps mentioned in the related work section.
+It first projects all the graphical marks to be avoided by the labels into an \emph{occupancy bitmap}.
+It then looks through each of the data points in one pass.
+For each data point, the algorithm iterates through the candidate positions of the label to be placed.
+It places the label at the first candidate position that does not overlap with any graphical mark in the occupancy bitmap (skipping the rest of the candidate locations).
+To place the label, it marks the rectangular bounding box of the label as an occupied area in the occupancy bitmap (\autoref{fig:bitmask}).
+After placing the label, it continues with the next data point.
+The algorithm to add labels in the three chart types mentioned only differs in
+(1) the graphical marks to be avoided by labels
+and (2) the candidate positions for labels.
+
+In scatter and connected scatter plots, candidate positions of a label are around the graphical point mark it represents.
+For a scatter plot, the marks to be avoided by labels include the point marks that represent data points in the plot.
+For a connected scatter plot, the marks to be avoided by labels include the point marks that represent data points in the plot and the line marks that connect the points (\autoref{fig:connected_scatter}).
+
+In line charts, each line is composed of a series of data points and a line that connects them all as a single path.
+Line charts are similar to connected scatter plots, but often one label represents a whole line instead of a data point.
+Therefore, the labeling algorithm places one label per line.
+Candidate positions of a label for a line are around each data point that represents the line.
+The marks to be avoided by labels include the line marks.
+
+A cartographic map (\autoref{fig:eval_airport_vis}) contains geographical locations that need to be annotated by labels and geographic properties that need to be avoided by the labels.
+Candidate positions of a label are (similar to scatterplots) around the locations to annotate.
+The marks to be avoided by labels include the point marks that represent locations and marks that represent geographical features (\eg country outlines and paths).

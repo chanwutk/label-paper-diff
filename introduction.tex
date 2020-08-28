@@ -1,0 +1,45 @@
+\firstsection{Introduction}
+\maketitle
+
+Text labels are important for annotating charts with details of specific data points.
+To be legible, labels should not overlap with other graphical marks in the chart.
+Since manual label placement can be tedious, prior work proposed automatic label placement algorithms (\eg \cite{luboschik:particle,mote:informed-greedy,zoraster:int-program,zoraster:annealing}).
+As the placement of each label can be arbitrary and depend on the placement of other labels in the chart,
+perfectly maximizing the number of placements is an NP-hard problem with respect to the number of labels to be placed.
+In practice, label placement algorithms need to strike a balance between achieving better performance
+(especially for interactive applications) and maximizing the number of labels placed.
+
+To achieve interactive performance, many label placement algorithms (\eg \cite{luboschik:particle,mote:informed-greedy}) use a greedy approach, instead of examining \emph{all} combinations of label placements.
+To place each label, these algorithms first determine a list of candidate placements.
+They then place each label at one of the positions without overlapping with any labels placed earlier.
+If all possible placements lead to overlap, they omit the particular label.
+This greedy approach greatly reduces the search space to be linear with respect to the number of labels.
+Now, detecting overlapping elements remains the bottleneck.
+A naïve overlap detection by comparing each position of a label with all placed labels yields an $O(n^2)$ runtime in a chart with $n$ labels.
+Its runtime still does not scale well for charts with many marks.
+
+Particle-Based Labeling~\cite{luboschik:particle}, the state-of-the-art fast labeling algorithm,
+accelerates overlap detection by simulating shapes as particles (collections of points) and
+comparing each label position only to particles in its neighborhood.
+This approach works well for charts that contain small shapes like scatter plots.
+However, for larger shapes, the algorithm needs to sample many points to simulate the shape's form,
+significantly increasing required computations for overlap detection.
+As the number of points to check with depends on the number of marks and their sizes, the required computation increases significantly for plot with many large marks.
+
+In this paper, we aim to improve the performance of label placement algorithms
+with a more efficient way to detect overlapping elements.
+In addition, we also aim to generalize the overlap detection technique so that it can be used with different types of charts.
+To achieve these goals, we make three contributions.
+
+First, we present \emph{occupancy bitmaps}, which record for each pixel on a particular chart whether it is occupied, as a new type of data structure for fast label overlap detection.
+All graphical marks are projected to a bitmap to record the area of pixels that they occupy.
+This bitmap structure leverages bitwise operators to quickly detect if a new label overlaps with any existing elements in the chart and update occupancy information after a new label is placed on the chart.
+With this approach, the cost to detect overlaps for a new label is fixed based on the chart size and size of the label, regardless of the number and the size of other graphical marks in the chart.
+
+Second, we apply occupancy bitmaps to label various charts with different mark types and placement strategies.
+We apply them to place labels (\ie position them around data points) in scatter plots, line charts, cartographic maps, and their combinations.
+
+Third, to evaluate our approach, we compare it to Particle-Based Labeling.
+Our approach requires over 22\% \emph{less} time to label a map of 3320 airports in the US and reachable airports from SEA-TAC airport,
+while producing labels with comparable visual quality measured as the number of labels placed.
+To facilitate this evaluation and the adoption of our method, we implement it as an extension to the Vega visualization tool~\cite{satyanarayan:vega}.
